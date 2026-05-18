@@ -1,7 +1,14 @@
+// Resolve the canonical site URL across local dev, Vercel previews, and prod.
+// Vercel injects VERCEL_URL automatically on every deployment.
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined) ??
+  "https://a3brands.com";
+
 export const siteConfig = {
   name: "A3 Brands GSC Intelligence Platform",
   shortName: "A3 Brands",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://lonestarford.com",
+  url: SITE_URL,
   description:
     "AI-powered Google Search Console and dealership SEO analytics for General Managers, Marketing Directors, Principal Dealers, and automotive dealer groups.",
   tagline: "See how your dealership performs on Google.",
