@@ -49,3 +49,4 @@ Thumbs.db
 # Prisma
 prisma/dev.db
 prisma/dev.db-journal
+.env.example
