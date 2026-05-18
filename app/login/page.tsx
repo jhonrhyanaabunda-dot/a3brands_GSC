@@ -42,8 +42,10 @@ export default function LoginPage() {
                 <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
                 <input
                   id="email"
+                  name="email"
                   type="email"
-                  defaultValue="principal@a3brands.com"
+                  autoComplete="email"
+                  placeholder="you@dealership.com"
                   className="h-12 w-full rounded-lg border border-stone-200 bg-white pl-10 pr-4 text-[14px] text-charcoal placeholder:text-stone-400 transition-all focus:border-brand focus:shadow-input-focus focus:outline-none"
                 />
               </div>
@@ -68,8 +70,10 @@ export default function LoginPage() {
                 <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
                 <input
                   id="password"
+                  name="password"
                   type="password"
-                  defaultValue="DemoPassword2026!"
+                  autoComplete="current-password"
+                  placeholder="Enter your password"
                   className="h-12 w-full rounded-lg border border-stone-200 bg-white pl-10 pr-4 text-[14px] text-charcoal placeholder:text-stone-400 transition-all focus:border-brand focus:shadow-input-focus focus:outline-none"
                 />
               </div>

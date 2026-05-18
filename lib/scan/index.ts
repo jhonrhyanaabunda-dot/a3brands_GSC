@@ -162,28 +162,64 @@ export async function runScan(
     return fetched;
   }
 
-  // Try mobile first. If it times out, retry once with desktop strategy
-  // (separate Lighthouse pipeline - sometimes faster on JS-heavy auto sites).
+  // Try mobile first. If Lighthouse times out OR returns PAGE_HUNG (page
+  // stopped responding mid-audit, common on JS-heavy dealership sites behind
+  // bot-challenge JS), retry on the desktop pipeline. Desktop has lighter
+  // throttling and a separate render budget, so it often succeeds.
   let psi = await fetchPagespeed(norm.url, "mobile");
-  if (!psi.ok && psi.error.code === "TIMEOUT") {
+  const isLighthouseRecoverable = (msg: string) =>
+    /PAGE_HUNG|ERRORED_DOCUMENT_REQUEST|FAILED_DOCUMENT_REQUEST|NO_FCP|NO_LCP|TIMEOUT/i.test(
+      msg,
+    );
+  const shouldRetryDesktop =
+    !psi.ok &&
+    (psi.error.code === "TIMEOUT" || isLighthouseRecoverable(psi.error.message));
+  if (shouldRetryDesktop) {
     psi = await fetchPagespeed(norm.url, "desktop");
+  }
+
+  // Last-resort retry: if desktop also failed in a recoverable way, try a
+  // lightweight inner page. Dealer-site homepages are JS-bloated with sliders,
+  // chat widgets, and ad pixels that hang Lighthouse; inner pages often render
+  // cleanly even on the same bot-protected origin.
+  if (!psi.ok && (psi.error.code === "TIMEOUT" || isLighthouseRecoverable(psi.error.message))) {
+    const innerCandidates = ["/about-us", "/contact-us", "/about", "/contact"];
+    const origin = `${new URL(norm.url).protocol}//${new URL(norm.url).hostname}`;
+    for (const path of innerCandidates) {
+      const innerUrl = `${origin}${path}`;
+      const innerPsi = await fetchPagespeed(innerUrl, "desktop");
+      if (innerPsi.ok) {
+        psi = innerPsi;
+        break;
+      }
+    }
   }
   if (!psi.ok) {
     const isQuota = /quota|429/i.test(psi.error.message);
+    const isPageHung = /PAGE_HUNG/i.test(psi.error.message);
+    const isLighthouseFailure =
+      /ERRORED_DOCUMENT_REQUEST|FAILED_DOCUMENT_REQUEST|NO_FCP|NO_LCP/i.test(
+        psi.error.message,
+      );
     const isTimeout = psi.error.code === "TIMEOUT";
-    let suffix = "";
+
+    // Friendly, structured message - no wall of upstream error codes.
+    let userMessage: string;
     if (isQuota) {
-      suffix =
-        " Add PAGESPEED_API_KEY to .env.local (free at console.cloud.google.com - enable PageSpeed Insights API → create API key) to get 25k req/day on your own quota.";
+      userMessage = `${norm.domain} is bot-protected (Cloudflare or WAF), so we relayed through Google's PageSpeed Insights - but our PSI quota is exhausted. Add a free PAGESPEED_API_KEY (console.cloud.google.com → enable "PageSpeed Insights API" → create key) to scan ~25k URLs per day.`;
+    } else if (isPageHung || isLighthouseFailure) {
+      userMessage = `${norm.domain} is bot-protected (Cloudflare or WAF) and the page is JS-heavy enough that Google's PageSpeed Insights couldn't fully render it on mobile or desktop. Try a lighter inner page on the same site - e.g. ${norm.url.replace(/\/?$/, "")}/about or ${norm.url.replace(/\/?$/, "")}/contact - which typically render faster. Sites like lonestarford.com or a3brands.com will scan in 3-8 seconds.`;
     } else if (isTimeout) {
-      suffix =
-        " This is unusual - PSI normally returns in 30-60s. The site may be currently slow to render, or Lighthouse is hitting a JS error on the page. Try again in a minute, or scan a smaller URL on the same domain (e.g. /about instead of /).";
+      userMessage = `${norm.domain} took too long for our scanner (>90s). The site may be temporarily slow. Try again in a minute, or scan a smaller inner page like ${norm.url.replace(/\/?$/, "")}/about.`;
+    } else {
+      userMessage = `We couldn't audit ${norm.domain}. ${fetched.error.message} Google's PageSpeed Insights fallback also failed: ${psi.error.message}`;
     }
+
     return {
       ok: false,
       error: {
         code: fetched.error.code,
-        message: `${fetched.error.message} PageSpeed Insights fallback also failed: ${psi.error.message}${suffix}`,
+        message: userMessage,
       },
     };
   }

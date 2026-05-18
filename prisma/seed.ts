@@ -2,7 +2,7 @@
  * Realistic seed data for A3 Brands GSC Intelligence Platform.
  * Run with: npm run db:seed
  */
-import { PrismaClient, Role, DealershipTier, Brand, KeywordIntent, InsightCategory, InsightPriority, InsightStatus, LeadStatus, LeadSource, NotificationType, ReportType, ReportStatus } from "@prisma/client";
+import { PrismaClient, Prisma, Role, DealershipTier, Brand, KeywordIntent, InsightCategory, InsightPriority, InsightStatus, LeadStatus, LeadSource, NotificationType, ReportType, ReportStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -358,7 +358,7 @@ async function main() {
           ...tpl,
           dealershipId: d.id,
           status: pick([InsightStatus.NEW, InsightStatus.NEW, InsightStatus.NEW, InsightStatus.IN_PROGRESS]),
-        },
+        } as Prisma.AIInsightUncheckedCreateInput,
       });
     }
   }

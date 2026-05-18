@@ -236,9 +236,17 @@ function FormPanel({
         </Button>
       </div>
       {error ? (
-        <p className="mt-3 text-center text-[13px] font-semibold text-red-600">
-          {error}
-        </p>
+        <div className="mt-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-left">
+          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-[12px] font-bold uppercase tracking-[0.08em] text-amber-700">
+              Site is bot-protected
+            </p>
+            <p className="mt-1 text-[13px] leading-[20px] text-charcoal">
+              {error}
+            </p>
+          </div>
+        </div>
       ) : (
         <p className="mt-3 text-center text-[12px] text-stone">
           We fetch the homepage, parse meta + schema, and check robots.txt + sitemap - typically 3-8 seconds.

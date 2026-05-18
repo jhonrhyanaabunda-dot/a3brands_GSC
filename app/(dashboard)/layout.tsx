@@ -1,4 +1,3 @@
-import { DemoBanner } from "@/components/dashboard/demo-banner";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import {
@@ -22,7 +21,6 @@ export default async function DashboardLayout({
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="min-w-0 flex-1">
-        {session.isDemo ? <DemoBanner /> : null}
         <Topbar
           dealerships={dealerships}
           active={session.dealership}
