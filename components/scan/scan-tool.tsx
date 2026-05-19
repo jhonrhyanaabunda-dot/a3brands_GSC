@@ -425,6 +425,11 @@ function ResultsPanel({
         </div>
       </div>
 
+      <ImpactSummaryStrip
+        recommendations={result.recommendations}
+        domain={result.domain}
+      />
+
       <section>
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
@@ -587,6 +592,106 @@ function ResultsPanel({
         <span className="font-mono">{result.url}</span>. Keyword + GBP categories
         require connecting Google Search Console and Google Business Profile.
       </p>
+    </div>
+  );
+}
+
+function ImpactSummaryStrip({
+  recommendations,
+  domain,
+}: {
+  recommendations: ScanResult["recommendations"];
+  domain: string;
+}) {
+  const totalClicks = recommendations.reduce(
+    (s, r) => s + (r.estimatedClicksGain ?? 0),
+    0,
+  );
+  const totalRevenue = recommendations.reduce(
+    (s, r) => s + (r.estimatedRevenueGainUsd ?? 0),
+    0,
+  );
+  const totalHours = recommendations.reduce(
+    (s, r) => s + (r.effortHours ?? 0),
+    0,
+  );
+  const criticalCount = recommendations.filter(
+    (r) => r.priority === "CRITICAL" || r.priority === "HIGH",
+  ).length;
+
+  if (totalClicks === 0 && totalRevenue === 0) return null;
+
+  return (
+    <section className="ink-section relative overflow-hidden rounded-2xl p-6 sm:p-8">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-32 -top-32 h-72 w-72 rounded-full bg-brand/25 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-40 -left-20 h-64 w-64 rounded-full bg-brand/10 blur-3xl"
+      />
+
+      <div className="relative grid gap-6 lg:grid-cols-12 lg:items-center">
+        <div className="lg:col-span-7">
+          <div className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-3 py-1">
+            <Sparkles className="h-3.5 w-3.5 text-brand" />
+            <span className="font-display text-[10px] font-bold uppercase tracking-[0.12em] text-brand">
+              If you ship every recommendation
+            </span>
+          </div>
+          <h3 className="mt-3 font-display text-[24px] font-black leading-[28px] tracking-tight text-white sm:text-[28px] sm:leading-[32px]">
+            {domain} can recover
+            <br className="hidden sm:block" />
+            <span className="text-brand">
+              +{totalClicks.toLocaleString()} monthly organic clicks
+            </span>
+          </h3>
+          <p className="mt-2 max-w-xl text-[13px] leading-[20px] text-white/70">
+            Across {recommendations.length} prioritized recommendations · {criticalCount} flagged critical or high · industry-baseline estimates from automotive audits.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 lg:col-span-5">
+          <ImpactTile
+            label="Clicks"
+            value={`+${totalClicks >= 1000 ? `${(totalClicks / 1000).toFixed(1)}k` : totalClicks}`}
+            sub="per month"
+          />
+          <ImpactTile
+            label="Revenue"
+            value={`$${totalRevenue >= 1000 ? `${Math.round(totalRevenue / 1000)}k` : totalRevenue}`}
+            sub="attributable"
+          />
+          <ImpactTile
+            label="Effort"
+            value={`${totalHours}h`}
+            sub="total"
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ImpactTile({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+}) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3.5 backdrop-blur">
+      <p className="font-display text-[10px] font-bold uppercase tracking-[0.08em] text-white/60">
+        {label}
+      </p>
+      <p className="mt-1 font-display text-[22px] font-black leading-none tracking-tight text-white sm:text-[26px]">
+        {value}
+      </p>
+      <p className="mt-0.5 text-[10px] text-white/55">{sub}</p>
     </div>
   );
 }

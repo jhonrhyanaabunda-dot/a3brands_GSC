@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import { Bell, KeyRound, Link2, Settings2, Shield, Trash2 } from "lucide-react";
 
+import { DataFreshnessPanel } from "@/components/dashboard/data-freshness-panel";
+import { GscConnectHero } from "@/components/dashboard/gsc-connect-hero";
+import {
+  IntegrationCard,
+  SAMPLE_INTEGRATIONS,
+} from "@/components/dashboard/integration-card";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { DemoActionButton } from "@/components/demo/action-button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +30,29 @@ export default async function SettingsPage() {
         title="Settings"
         description="Manage your profile, notifications, integrations, and dealership preferences."
       />
+
+      {/* Hero: Search Console — the most important integration */}
+      <GscConnectHero />
+
+      {/* Connection health + integrations side by side on wide screens */}
+      <div className="grid gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-5">
+          <DataFreshnessPanel />
+        </div>
+        <div className="lg:col-span-7">
+          <SectionCard
+            icon={Link2}
+            title="Other integrations"
+            description="Notifications, CRM, scheduling, and downstream BI."
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              {SAMPLE_INTEGRATIONS.map((i) => (
+                <IntegrationCard key={i.id} i={i} />
+              ))}
+            </div>
+          </SectionCard>
+        </div>
+      </div>
 
       <SectionCard icon={Settings2} title="Profile" description="How you appear inside A3 Brands.">
         <div className="grid gap-4 md:grid-cols-2">
@@ -79,41 +108,6 @@ export default async function SettingsPage() {
             >
               <div className="text-[14px] text-charcoal">{row.label}</div>
               <Toggle on={row.on} />
-            </li>
-          ))}
-        </ul>
-      </SectionCard>
-
-      <SectionCard icon={Link2} title="Integrations" description="Connect data sources and downstream systems.">
-        <ul className="grid gap-3 md:grid-cols-2">
-          {[
-            { name: "Google Search Console", connected: true, helper: "5 properties · synced 2h ago" },
-            { name: "Google Analytics 4", connected: true, helper: "5 properties · synced 2h ago" },
-            { name: "Google Business Profile", connected: true, helper: "5 locations" },
-            { name: "Slack", connected: false, helper: "Send weekly summaries to a channel" },
-            { name: "HubSpot", connected: false, helper: "Sync leads from /scan" },
-            { name: "Calendly", connected: false, helper: "Inbound demo scheduling" },
-          ].map((i) => (
-            <li
-              key={i.name}
-              className="flex items-center justify-between gap-3 rounded-xl border border-stone-200 bg-white p-4"
-            >
-              <div className="min-w-0">
-                <div className="truncate font-display text-[14px] font-bold text-charcoal">{i.name}</div>
-                <div className="mt-0.5 truncate text-[12px] text-stone">{i.helper}</div>
-              </div>
-              {i.connected ? (
-                <Badge variant="success">Connected</Badge>
-              ) : (
-                <DemoActionButton
-                  variant="secondary"
-                  size="sm"
-                  toastMessage={`${i.name} connection started.`}
-                  toastDescription="OAuth flow will open in a new tab once production credentials are configured."
-                >
-                  Connect
-                </DemoActionButton>
-              )}
             </li>
           ))}
         </ul>

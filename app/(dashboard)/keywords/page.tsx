@@ -3,6 +3,8 @@ import { Download } from "lucide-react";
 
 import { KeywordsTable } from "@/components/dashboard/keywords-table";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { RankDistribution } from "@/components/dashboard/rank-distribution";
+import { TopMoversStrip } from "@/components/dashboard/top-movers-strip";
 import { DemoActionButton } from "@/components/demo/action-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,6 +61,15 @@ export default async function KeywordsPage() {
           </div>
         }
       />
+      <div className="grid gap-4 lg:grid-cols-12">
+        <div className="lg:col-span-5">
+          <RankDistribution keywords={keywords} />
+        </div>
+        <div className="lg:col-span-7">
+          <TopMoversStrip keywords={keywords} />
+        </div>
+      </div>
+
       <KeywordsTable keywords={keywords} />
     </div>
   );

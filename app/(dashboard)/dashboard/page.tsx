@@ -4,6 +4,7 @@ import { ArrowRight, Calendar, Download, FileText } from "lucide-react";
 
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { CompetitorBar } from "@/components/dashboard/competitor-bar";
+import { ConnectGscCard } from "@/components/dashboard/connect-gsc-card";
 import { DeviceCard } from "@/components/dashboard/device-card";
 import { InsightsPreview } from "@/components/dashboard/insights-preview";
 import { KeywordPreview } from "@/components/dashboard/keyword-preview";
@@ -101,6 +102,8 @@ export default async function DashboardPage() {
           </>
         }
       />
+
+      <ConnectGscCard />
 
       <KpiGrid kpis={kpis} series={series} />
 

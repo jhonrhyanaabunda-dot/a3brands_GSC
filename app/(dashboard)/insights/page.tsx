@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { ImpactEffortMatrix } from "@/components/dashboard/impact-effort-matrix";
+import { InsightRecoveryHero } from "@/components/dashboard/insight-recovery-hero";
 import { InsightsBoard } from "@/components/dashboard/insights-board";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +10,6 @@ import {
   getInsightsSummary,
   getSessionContext,
 } from "@/lib/data";
-import { formatCompactNumber, formatCurrency } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "AI Insights",
@@ -26,7 +27,7 @@ export default async function InsightsPage() {
       <PageHeader
         eyebrow="AI recommendation engine"
         title="Your action queue"
-        description={`${summary.open} open insights for ${session.dealership.name}. Projected impact: +${formatCompactNumber(summary.totalProjectedClicks)} clicks/mo and ${formatCurrency(summary.totalProjectedRevenue)} in attributable revenue.`}
+        description={`Generated for ${session.dealership.name} from your latest GSC, GBP, and PageSpeed data. Ranked by projected click recovery per engineering hour.`}
         meta={
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <Badge variant="critical">{summary.critical} critical</Badge>
@@ -36,6 +37,14 @@ export default async function InsightsPage() {
           </div>
         }
       />
+
+      <InsightRecoveryHero
+        insights={insights}
+        dealershipName={session.dealership.name}
+      />
+
+      <ImpactEffortMatrix insights={insights} />
+
       <InsightsBoard insights={insights} />
     </div>
   );
